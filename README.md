@@ -72,7 +72,7 @@ Note that the instructions below are intended to give you step-by-step, how-to i
 
     This [script](./deploy2.sh) deploys the Istio Service Mesh demo profile, disabling the Istio Egress Gateway, while enabling the Istio Ingress Gateway along with Kubernetes annotations that signal the AWS Load Balancer Controller to automatically deploy a Network Load Balancer and associate it with the Ingress Gateway service.
 
-6. <b>To prevent getting contacted by security</b>: In the AWS Console, go to security groups.  Edit `eksctl-<PREFIX>-istio-saas-nodegroup-nodegroup-remoteAccess` and change the IPV4 line's source to 165.1.215.121/32 and delete the ipv6 rule
+6. <b>To prevent getting contacted by security</b>: In the AWS Console, go to security groups.  Edit `eksctl-<PREFIX>-istio-saas-nodegroup-nodegroup-remoteAccess` and change the IPV4 line's source to the appropriate VPN IP (US West: 165.1.215.121, US East: 208.127.231.5) and delete the ipv6 rule
 
 7. Deploy Cognito User Pools
     > :warning: Close the terminal window that you create the cluster in, and open a new terminal before starting this step otherwise you may get errors about your AWS_REGION not set.
