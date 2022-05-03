@@ -28,7 +28,7 @@ helm uninstall aws-load-balancer-controller \
 echo "Deleting ECR Repository"
 aws ecr delete-repository \
   --force \
-  --repository-name envoyproxy  2>&1 > /dev/null
+  --repository-name ${PREFIX}-envoyproxy  2>&1 > /dev/null
 
 echo "Deleting EKS Cluster"
 eksctl delete cluster --name ${PREFIX}-istio-saas

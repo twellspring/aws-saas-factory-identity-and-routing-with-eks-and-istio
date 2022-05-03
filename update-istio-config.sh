@@ -13,7 +13,7 @@ kubectl -n cluster1-gateway-ns apply -f ${YAML_PATH}/cluster1-gateway.yaml
 echo "Updating Envoy Config"
 python3 update-envoy-config.py
 
-REPO_NAME="envoyproxy"
+REPO_NAME="${PREFIX}-envoyproxy"
 
 ECR_REPO=$(aws ecr describe-repositories --repository-names $REPO_NAME)
 

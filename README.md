@@ -8,8 +8,9 @@ Note that the instructions below are intended to give you step-by-step, how-to i
 ## local workstation prerequisites
 - aws cli
 - eksctl
-- istioctl (assumes ~/bin is already in your path)
+- istioctl 
   ```bash
+  # assumes ~/bin is al ready in your path
   curl --no-progress-meter -L https://istio.io/downloadIstio | sh -
   cd istio-<istio version>
   bin/istioctl version
@@ -18,6 +19,12 @@ Note that the instructions below are intended to give you step-by-step, how-to i
 - pyyaml (`pip3 -q install PyYAML`)
 - kubectl
 - helm
+- A running docker Daemon (Docker Desktop, Minikube)
+  - If using minikube, edit ~/.docker/config.json and replace credsStore with credStore. This prevents the following error on the `docker push`
+    ```
+    Error saving credentials: error storing credentials - err: exec: "docker-credential-desktop": executable file not found in $PATH, out: 
+    ```
+
 
 
 ## Setting up the environment
@@ -36,13 +43,7 @@ Note that the instructions below are intended to give you step-by-step, how-to i
     mkdir yaml
     export YAML_PATH=yaml
     ```
-    <s>changes from original repo
-    - global search/replace `#!/usr/bin/bash` --> `#!/usr/bin/env bash`
-    - global search/replace `istio-ref-arch` --> `${PREFIX}-istio-ref-arch`
-    - global search/replace `istio-saas` --> `${PREFIX}-istio-saas`
-    </s>
-
-5. Setup Keys (from setup.sh)
+3. Setup Keys (from setup.sh)
 
    ```bash
    ssh-keygen -t rsa -f ~/.ssh/istio-saas -N ''
@@ -50,7 +51,7 @@ Note that the instructions below are intended to give you step-by-step, how-to i
    aws kms create-alias --alias-name alias/${PREFIX}-istio-ref-arch --target-key-id $(aws kms create-key --query KeyMetadata.Arn --output text)
    export MASTER_ARN=$(aws kms describe-key --key-id alias/${PREFIX}-istio-ref-arch --query KeyMetadata.Arn --output text)
    ```
-6. Create the EKS Cluster
+4. Create the EKS Cluster
     * Run the following script to create a cluster configuration file, and subsequently provision the cluster using `eksctl`:
 
     ```bash
@@ -62,7 +63,7 @@ Note that the instructions below are intended to give you step-by-step, how-to i
 
     After EKS Cluster is set up, the script also deploys AWS Load Balancer Controller on the cluster.
 
-7. Deploy Istio Service Mesh
+5. Deploy Istio Service Mesh
 
     ```bash
     chmod +x deploy2.sh
@@ -71,7 +72,7 @@ Note that the instructions below are intended to give you step-by-step, how-to i
 
     This [script](./deploy2.sh) deploys the Istio Service Mesh demo profile, disabling the Istio Egress Gateway, while enabling the Istio Ingress Gateway along with Kubernetes annotations that signal the AWS Load Balancer Controller to automatically deploy a Network Load Balancer and associate it with the Ingress Gateway service.
 
-8. Deploy Cognito User Pools
+6. Deploy Cognito User Pools
     > :warning: Close the terminal window that you create the cluster in, and open a new terminal before starting this step otherwise you may get errors about your AWS_REGION not set.
     * Open a **_NEW_** terminal window and `cd` back into `aws-saas-factory-identity-and-routing-with-eks-and-istio` and run the following script:
 
@@ -88,10 +89,7 @@ Note that the instructions below are intended to give you step-by-step, how-to i
 
     2. External Authorization Policy for Istio Ingress Gateway
 
-9. Configure Istio Ingress Gateway
-    > :warning: Close the terminal window that you create the cluster in, and open a new terminal before starting this step otherwise you may get errors about your AWS_REGION not set.
-    * Open a **_NEW_** terminal window and `cd` back into `aws-saas-factory-identity-and-routing-with-eks-and-istio` and run the following script:
-
+7. Configure Istio Ingress Gateway
     ```bash
     chmod +x configure-istio.sh
     ./configure-istio.sh
@@ -121,104 +119,97 @@ Note that the instructions below are intended to give you step-by-step, how-to i
 
     f. Adds an Istio External Authorization Provider definition pointing to the Envoy Reverse Proxy
 
-10. Deploy Tenant Application Microservices
-     > :warning: Close the terminal window that you create the cluster in, and open a new terminal before starting this step otherwise you may get errors about your AWS_REGION not set.
-     * Open a **_NEW_** terminal window and `cd` back into `aws-saas-factory-identity-and-routing-with-eks-and-istio` and run the following script:
+8. Deploy Tenant Application Microservices
+    > :warning: Close the terminal window that you create the cluster in, and open a new terminal before starting this step otherwise you may get errors about your AWS_REGION not set.
+    * Open a **_NEW_** terminal window and `cd` back into `aws-saas-factory-identity-and-routing-with-eks-and-istio` and run the following script:
 
-     ```bash
-     chmod +x deploy-tenant-services.sh
-     ./deploy-tenant-services.sh
-     ```
-
-     This [script](./deploy-tenant-services.sh) creates the service dpeloyments for the two (2) sample tenants, along with Istio VirtualService constructs that define the routing rules.
-
-11. Once finished running all the above steps, the bookinfo app can be accessed using the following steps.
-
-    a. Since the sample tenants are built using the DNS domain example.com, domain name entries are made into the local desktop/laptop hosts file. For Linux/MacOS the file is /etc/hosts and on Windows it is C:\Windows\System32\drivers\etc\hosts.
-
-    b. Wait for the Network Load Balancer instance status, in AWS Management Console, to change from Provisioning to Active.
-
-    c. Run the following command in the Cloud9 shell
     ```bash
-    chmod +x hosts-file-entry.sh
-    ./hosts-file-entry.sh
+    chmod +x deploy-tenant-services.sh
+    ./deploy-tenant-services.sh
     ```
 
-    d. Append the output of the command into the local hosts file. It identifies the load balancer instance associated with the Istio Ingress Gateway, and looks up the public IP addresses assigned to it.
+    This [script](./deploy-tenant-services.sh) creates the service dpeloyments for the two (2) sample tenants, along with Istio VirtualService constructs that define the routing rules.
 
-    e. To avoid TLS cert conflicts, configure the browser on desktop/laptop with a new profiles
+   1. Once finished running all the above steps, the bookinfo app can be accessed using the following steps.
 
-    f. The browser used to test this deployment was Mozilla Firefox, in which a new profile can be created by pointing the browser to "about:profiles"
+      a. Since the sample tenants are built using the DNS domain example.com, domain name entries are made into the local desktop/laptop hosts file. For Linux/MacOS the file is /etc/hosts and on Windows it is C:\Windows\System32\drivers\etc\hosts.
 
-    g. Create a new profile, such as, "istio-saas"
+      b. Wait for the Network Load Balancer instance status, in AWS Management Console, to change from Provisioning to Active.
 
-    h. After creating the profile, click on the "Launch profile in new browser"
+      c. Run the following command in the shell
+      ```bash
+      chmod +x hosts-file-entry.sh
+      ./hosts-file-entry.sh
+      ```
+   
+      d. Run `MakeMeAdmin` from SelfService before you `sudo vi /etc/hosts`
+      e. Append the output of the command to /etc/hosts. It identifies the load balancer instance associated with the Istio Ingress Gateway, and looks up the public IP addresses assigned to it.
+      f. In the browser, open two tabs, one for each of the following URLs:
 
-    i. In the browser, open two tabs, one for each of the following URLs:
+       ```
+          https://tenanta.example.com/bookinfo
 
-    ```
-       https://tenanta.example.com/bookinfo
+          https://tenantb.example.com/bookinfo
+       ```
 
-       https://tenantb.example.com/bookinfo
-    ```
+       j. Because of self-signed TLS certificates, you may received a certificate related error or warning from the browser
 
-    j. Because of self-signed TLS certificates, you may received a certificate related error or warning from the browser
+       k. When the login prompt appears:
 
-    k. When the login prompt appears:
+          In the browser windows with the "istio-saas" profile, login with:
 
-       In the browser windows with the "istio-saas" profile, login with:
+       ```
+          user1@tenanta.com
 
-    ```
-       user1@tenanta.com
+          user1@tenantb.com
+       ```
+          This should result in displaying the bookinfo page
+      m. in k9s look at the productpage pod logs to verify that one connection went to tenanta and one to tenantb
 
-       user1@tenantb.com
-    ```
-       This should result in displaying the bookinfo page
+9. Tenant Onboarding
 
-12. Tenant Onboarding
-
-    a. Add User Pools for new tenants
+   a. Add User Pools for new tenants
     
-    ```bash
-    chmod +x add-userpools.sh
-    ./add-userpools.sh
-    ```
+   ```bash
+   chmod +x add-userpools.sh
+   ./add-userpools.sh
+   ```
 
-    b. Re-configure Istio Ingress Gateway and Envoy Reverse Proxy
+   b. Re-configure Istio Ingress Gateway and Envoy Reverse Proxy
     
-    ```bash
-    chmod +x update-istio-config.sh
-    ./update-istio-config.sh
-    ```
-    c. Deploy new tenant's microservices
+   ```bash
+   chmod +x update-istio-config.sh
+   ./update-istio-config.sh
+   ```
+   c. Deploy new tenant's microservices
 
-    ```bash
-    chmod +x update-tenant-services.sh
-    ./update-tenant-services.sh
-    ```
-    d. Run the following command in the Cloud9 shell
-    ```bash
-    chmod +x update-hosts-file-entry.sh
-    ./update-hosts-file-entry.sh
-    ```
+   ```bash
+   chmod +x update-tenant-services.sh
+   ./update-tenant-services.sh
+   ```
+   d. Run the following command in the Cloud9 shell
+   ```bash
+   chmod +x update-hosts-file-entry.sh
+   ./update-hosts-file-entry.sh
+   ```
 
-    e. Append the output of the command into the local hosts file. It identifies the load balancer instance associated with the Istio Ingress Gateway, and looks up the public IP addresses assigned to it.
+   e. Append the output of the command into the local hosts file. It identifies the load balancer instance associated with the Istio Ingress Gateway, and looks up the public IP addresses assigned to it.
 
-    f. In the browser window with the "istio-saas" profile, open another tab for:
+   f. In the browser window with the "istio-saas" profile, open another tab for:
 
-    ```
-       https://tenantc.example.com/bookinfo
-    ```
+   ```
+      https://tenantc.example.com/bookinfo
+   ```
 
-    g. Because of self-signed TLS certificates, you may received a certificate related error or warning from the browser
+   g. Because of self-signed TLS certificates, you may received a certificate related error or warning from the browser
 
-    h. When the login prompt appears, login with:
+   h. When the login prompt appears, login with:
 
-    ```
-       user1@tenantc.com
-    ```
+   ```
+      user1@tenantc.com
+   ```
 
-       This should result in displaying the bookinfo page
+      This should result in displaying the bookinfo page
 
 ## Cleanup
 
