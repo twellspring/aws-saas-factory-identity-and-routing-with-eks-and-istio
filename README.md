@@ -11,7 +11,7 @@ Note that the instructions below are intended to give you step-by-step, how-to i
 - istioctl (assumes ~/bin is already in your path)
   ```bash
   curl --no-progress-meter -L https://istio.io/downloadIstio | sh -
-  cd istio-${ISTIO_VERSION}
+  cd istio-<istio version>
   bin/istioctl version
   cp -v bin/istioctl ~/bin
   ```
