@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 . ~/.bash_profile
 
 echo "Deploying Tenant C services on EKS..."

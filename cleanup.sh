@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 . ~/.bash_profile
 
 TENANTS="tenanta tenantb tenantc"
@@ -31,19 +31,19 @@ aws ecr delete-repository \
   --repository-name envoyproxy  2>&1 > /dev/null
 
 echo "Deleting EKS Cluster"
-eksctl delete cluster --name istio-saas
+eksctl delete cluster --name ${PREFIX}-istio-saas
 
 echo "Removing KMS Key and Alias"
 export MASTER_ARN=$(aws kms describe-key \
-  --key-id alias/istio-ref-arch\
+  --key-id alias/${PREFIX}-istio-ref-arch\
   --query KeyMetadata.Arn --output text)
 
 aws kms disable-key \
   --key-id ${MASTER_ARN}
 
 aws kms delete-alias \
-  --alias-name alias/istio-ref-arch
+  --alias-name alias/${PREFIX}-istio-ref-arch
 
 echo "Deleting EC2 Key-Pair"
 aws ec2 delete-key-pair \
-  --key-name "istio-saas"
+  --key-name "${PREFIX}-istio-saas"

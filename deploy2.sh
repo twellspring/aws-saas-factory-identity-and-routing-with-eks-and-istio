@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 . ~/.bash_profile
 
 echo "Installing Istio with Ingress Gateway (NLB)"

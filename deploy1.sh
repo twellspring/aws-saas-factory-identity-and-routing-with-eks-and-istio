@@ -1,11 +1,12 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 source ~/.bash_profile
 
-export EKS_CLUSTER_NAME="istio-saas"
+export EKS_CLUSTER_NAME="${PREFIX}-istio-saas"
 test -n "$EKS_CLUSTER_NAME" && echo EKS_CLUSTER_NAME is "$EKS_CLUSTER_NAME" || echo EKS_CLUSTER_NAME is not set
 echo "export EKS_CLUSTER_NAME=${EKS_CLUSTER_NAME}" | tee -a ~/.bash_profile
 
-export MASTER_ARN=$(aws kms describe-key --key-id alias/istio-ref-arch --query KeyMetadata.Arn --output text)
+
+export MASTER_ARN=$(aws kms describe-key --key-id alias/${PREFIX}-istio-ref-arch --query KeyMetadata.Arn --output text)
 
 echo "Deploying EKS Cluster ${EKS_CLUSTER_NAME}"
 
@@ -14,7 +15,7 @@ cat << EOF > ${YAML_PATH}/istio-cluster-config.yaml
 apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 metadata:
-  name: istio-saas
+  name: ${PREFIX}-istio-saas
   region: ${AWS_REGION}
   version: "1.21"
 iam:
@@ -37,7 +38,7 @@ managedNodeGroups:
   volumeEncrypted: true
   ssh:
     allow: true
-    publicKeyName: istio-saas
+    publicKeyName: ${PREFIX}-istio-saas
 # To enable all of the control plane logs, uncomment below:
 # cloudWatch:
 #  clusterLogging:

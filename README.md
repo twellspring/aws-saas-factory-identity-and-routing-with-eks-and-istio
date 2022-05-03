@@ -5,41 +5,45 @@ The code shared here is intended to provide a sample implementation of a SaaS Id
 Note that the instructions below are intended to give you step-by-step, how-to instructions for getting this solution up and running in your own AWS account. For a general description and overview of the solution, please see the 
 [blog post here](https://aws.amazon.com/blogs/apn/saas-identity-and-routing-with-istio-service-mesh-and-amazon-eks/).
 
+## local workstation prerequisites
+- aws cli
+- eksctl
+- pyyaml (`pip3 -q install PyYAML`)
+- kubectl
+- helm
+
+
 ## Setting up the environment
 
-> :warning: The Cloud9 workspace should be built by an IAM user with Administrator privileges, not the root account user. Please ensure you are logged in as an IAM user, not the root account user.
-
-1. Create new Cloud9 Environment
-    * Launch Cloud9 in your closest region Ex: `https://us-west-2.console.aws.amazon.com/cloud9/home?region=us-west-2`
-    * Select Create environment
-    * Name it whatever you want, click Next.
-    * Choose “t3.small” for instance type, take all default values and click Create environment
-2. Create EC2 Instance Role
-    * Follow this [deep link](https://console.aws.amazon.com/iam/home#/roles$new?step=review&commonUseCase=EC2%2BEC2&selectedUseCase=EC2&policies=arn:aws:iam::aws:policy%2FAdministratorAccess) to create an IAM role with Administrator access.
-    * Confirm that AWS service and EC2 are selected, then click Next to view permissions.
-    * Confirm that AdministratorAccess is checked, then click `Next: Tags` to assign tags.
-    * Take the defaults, and click `Next: Review` to review.
-    * Enter `istio-ref-arch-admin` for the Name, and click `Create role`.
-3. Remove managed credentials and attach EC2 Instance Role to Cloud9 Instance
-    * Click the gear in the upper right-hand corner of the IDE which opens settings. Click the `AWS Settings` on the left and under `Credentials` slide the button to the left for `AWS Managed Temporary Credentials. The button should be greyed out when done with an x to the right indicating it's off.
-    * Click the round Button with an alphabet in the upper right-hand corner of the IDE and click `Manage EC2 Instance`. This will take you to the EC2 portion of the AWS Console
-    * Right-click the EC2 instance and in the fly-out menu, click `Security` -> `Modify IAM Role`
-    * Choose the Role you created in step 3 above. It should be titled "istio-ref-arch-admin" and click `Save`.
-4. Clone the repo and run the setup script
-    * Return to the Cloud9 IDE
-    * In the upper left part of the main screen, click the round green button with a `+` on it and click `New Terminal`
-    * Enter the following in the terminal window
-
-    ```bash
-    git clone https://github.com/aws-samples/aws-saas-factory-identity-and-routing-with-eks-and-istio.git
+1. Setup workstation AWS environment
+   - Do the normal awsapps.com login
+   - Add credentials to terminal
+   - export AWS_REGION=us-east-2
+   - unset AWS_PROFILE
+   - export PREFIX=`<your username>`
+2. Clone/cd to repo
+   ```bash
+    git@github.com:twellspring/aws-saas-factory-identity-and-routing-with-eks-and-istio.git
     cd aws-saas-factory-identity-and-routing-with-eks-and-istio
-    chmod +x setup.sh
-    ./setup.sh
+    git checkout remove_cloud9
+    mkdir yaml
+    export YAML_PATH=yaml
+    ```
+    <s>changes from original repo
+    - global search/replace `#!/usr/bin/bash` --> `#!/usr/bin/env bash`
+    - global search/replace `istio-ref-arch` --> `${PREFIX}-istio-ref-arch`
+    - global search/replace `istio-saas` --> `${PREFIX}-istio-saas`
+    </s>
+
+5. Setup Keys (from setup.sh)
+
+   ```bash
+   ssh-keygen -t rsa -f ~/.ssh/istio-saas -N ''
+   aws ec2 import-key-pair --key-name "${PREFIX}-istio-saas" --public-key-material fileb://~/.ssh/istio-saas.pub
+   aws kms create-alias --alias-name alias/${PREFIX}-istio-ref-arch --target-key-id $(aws kms create-key --query KeyMetadata.Arn --output text)
+   export MASTER_ARN=$(aws kms describe-key --key-id alias/${PREFIX}-istio-ref-arch --query KeyMetadata.Arn --output text)
    ```
-
-   This [script](./setup.sh) sets up all Kubernetes tools, updates the AWS CLI and installs other dependencies that we'll use later. Take note of the final output of this script. If everything worked correctly, you should see the message that the you're good to continue creating the EKS cluster. If you do not see this message, please do not continue. Ensure that the Administrator EC2 role was created and successfully attached to the EC2 instance that's running your Cloud9 IDE. Also ensure you turned off `AWS Managed Credentials` inside your Cloud9 IDE (refer to steps 2 and 3).
-
-5. Create the EKS Cluster
+6. Create the EKS Cluster
     * Run the following script to create a cluster configuration file, and subsequently provision the cluster using `eksctl`:
 
     ```bash
@@ -51,7 +55,7 @@ Note that the instructions below are intended to give you step-by-step, how-to i
 
     After EKS Cluster is set up, the script also deploys AWS Load Balancer Controller on the cluster.
 
-6. Deploy Istio Service Mesh
+7. Deploy Istio Service Mesh
     > :warning: Close the terminal window that you created the cluster in, and open a new terminal before starting this step otherwise you may get errors about your AWS_REGION not set.
     * Open a **_NEW_** terminal window and `cd` back into `aws-saas-factory-identity-and-routing-with-eks-and-istio` and run the following script:
 
@@ -62,7 +66,7 @@ Note that the instructions below are intended to give you step-by-step, how-to i
 
     This [script](./deploy2.sh) deploys the Istio Service Mesh demo profile, disabling the Istio Egress Gateway, while enabling the Istio Ingress Gateway along with Kubernetes annotations that signal the AWS Load Balancer Controller to automatically deploy a Network Load Balancer and associate it with the Ingress Gateway service.
 
-7. Deploy Cognito User Pools
+8. Deploy Cognito User Pools
     > :warning: Close the terminal window that you create the cluster in, and open a new terminal before starting this step otherwise you may get errors about your AWS_REGION not set.
     * Open a **_NEW_** terminal window and `cd` back into `aws-saas-factory-identity-and-routing-with-eks-and-istio` and run the following script:
 
@@ -79,7 +83,7 @@ Note that the instructions below are intended to give you step-by-step, how-to i
 
     2. External Authorization Policy for Istio Ingress Gateway
 
-8. Configure Istio Ingress Gateway
+9. Configure Istio Ingress Gateway
     > :warning: Close the terminal window that you create the cluster in, and open a new terminal before starting this step otherwise you may get errors about your AWS_REGION not set.
     * Open a **_NEW_** terminal window and `cd` back into `aws-saas-factory-identity-and-routing-with-eks-and-istio` and run the following script:
 
@@ -112,18 +116,18 @@ Note that the instructions below are intended to give you step-by-step, how-to i
 
     f. Adds an Istio External Authorization Provider definition pointing to the Envoy Reverse Proxy
 
-9. Deploy Tenant Application Microservices
-    > :warning: Close the terminal window that you create the cluster in, and open a new terminal before starting this step otherwise you may get errors about your AWS_REGION not set.
-    * Open a **_NEW_** terminal window and `cd` back into `aws-saas-factory-identity-and-routing-with-eks-and-istio` and run the following script:
+10. Deploy Tenant Application Microservices
+     > :warning: Close the terminal window that you create the cluster in, and open a new terminal before starting this step otherwise you may get errors about your AWS_REGION not set.
+     * Open a **_NEW_** terminal window and `cd` back into `aws-saas-factory-identity-and-routing-with-eks-and-istio` and run the following script:
 
-    ```bash
-    chmod +x deploy-tenant-services.sh
-    ./deploy-tenant-services.sh
-    ```
+     ```bash
+     chmod +x deploy-tenant-services.sh
+     ./deploy-tenant-services.sh
+     ```
 
-    This [script](./deploy-tenant-services.sh) creates the service dpeloyments for the two (2) sample tenants, along with Istio VirtualService constructs that define the routing rules.
+     This [script](./deploy-tenant-services.sh) creates the service dpeloyments for the two (2) sample tenants, along with Istio VirtualService constructs that define the routing rules.
 
-10. Once finished running all the above steps, the bookinfo app can be accessed using the following steps.
+11. Once finished running all the above steps, the bookinfo app can be accessed using the following steps.
 
     a. Since the sample tenants are built using the DNS domain example.com, domain name entries are made into the local desktop/laptop hosts file. For Linux/MacOS the file is /etc/hosts and on Windows it is C:\Windows\System32\drivers\etc\hosts.
 
@@ -166,7 +170,7 @@ Note that the instructions below are intended to give you step-by-step, how-to i
     ```
        This should result in displaying the bookinfo page
 
-11. Tenant Onboarding
+12. Tenant Onboarding
 
     a. Add User Pools for new tenants
     

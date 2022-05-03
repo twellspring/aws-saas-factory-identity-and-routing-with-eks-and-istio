@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 . ~/.bash_profile
 
 TENANTS="tenantc"

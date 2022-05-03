@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 . ~/.bash_profile
 
 # Add oauth2-proxy Helm Repo

@@ -62,12 +62,12 @@ rm -vf ${HOME}/.aws/credentials
 echo "Generating a new key. Hit ENTER three times when prompted to accept the defaults"
 ssh-keygen
 
-aws ec2 import-key-pair --key-name "istio-saas" --public-key-material fileb://~/.ssh/id_rsa.pub
+aws ec2 import-key-pair --key-name "${PREFIX}-istio-saas" --public-key-material fileb://~/.ssh/id_rsa.pub
 
-aws kms create-alias --alias-name alias/istio-ref-arch --target-key-id $(aws kms create-key --query KeyMetadata.Arn --output text)
+aws kms create-alias --alias-name alias/${PREFIX}-istio-ref-arch --target-key-id $(aws kms create-key --query KeyMetadata.Arn --output text)
 
-export MASTER_ARN=$(aws kms describe-key --key-id alias/istio-ref-arch --query KeyMetadata.Arn --output text)
+export MASTER_ARN=$(aws kms describe-key --key-id alias/${PREFIX}-istio-ref-arch --query KeyMetadata.Arn --output text)
 
 echo "export MASTER_ARN=${MASTER_ARN}" | tee -a ~/.bash_profile
 
-aws sts get-caller-identity --query Arn | grep istio-ref-arch-admin -q && echo "IAM role valid. You can continue setting up the EKS Cluster." || echo "IAM role NOT valid. Do not proceed with creating the EKS Cluster or you won't be able to authenticate. Ensure you assigned the role to your EC2 instance as detailed in the README.md of the istio-saas repo"
+aws sts get-caller-identity --query Arn | grep ${PREFIX}-istio-ref-arch-admin -q && echo "IAM role valid. You can continue setting up the EKS Cluster." || echo "IAM role NOT valid. Do not proceed with creating the EKS Cluster or you won't be able to authenticate. Ensure you assigned the role to your EC2 instance as detailed in the README.md of the ${PREFIX}-istio-saas repo"
