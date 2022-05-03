@@ -81,7 +81,7 @@ Note that the instructions below are intended to give you step-by-step, how-to i
     ./deploy-userpools.sh
     ```
 
-    This [script](./deploy-userpools.sh) deploys Cognito User Pools for two (2) example tenants: tenanta and tenantb. Within each User Pool. The script will ask for passwords that will be set for each user.
+    This [script](./deploy-userpools.sh) deploys Cognito User Pools for two (2) example tenants: tenanta and tenantb. Within each User Pool. The script will ask for passwords that will be set for each user. Save these passwords for use when logging in to the sites.
 
     The script also generates the following YAML files for OIDC proxy configuration which will be deployed in the next step: 
 
@@ -144,7 +144,8 @@ Note that the instructions below are intended to give you step-by-step, how-to i
    
       d. Run `MakeMeAdmin` from SelfService before you `sudo vi /etc/hosts`
       e. Append the output of the command to /etc/hosts. It identifies the load balancer instance associated with the Istio Ingress Gateway, and looks up the public IP addresses assigned to it.
-      f. In the browser, open two tabs, one for each of the following URLs:
+      f. Disconnect from VPN (if you don't you get blocked by the firewall)
+      g. In the browser, open two tabs, one for each of the following URLs:
 
        ```
           https://tenanta.example.com/bookinfo
@@ -152,9 +153,9 @@ Note that the instructions below are intended to give you step-by-step, how-to i
           https://tenantb.example.com/bookinfo
        ```
 
-       j. Because of self-signed TLS certificates, you may received a certificate related error or warning from the browser
+       h. Because of self-signed TLS certificates, you may received a certificate related error or warning from the browser
 
-       k. When the login prompt appears:
+       i. When the login prompt appears:
 
           In the browser windows with the "istio-saas" profile, login with:
 
@@ -164,7 +165,7 @@ Note that the instructions below are intended to give you step-by-step, how-to i
           user1@tenantb.com
        ```
           This should result in displaying the bookinfo page
-      m. in k9s look at the productpage pod logs to verify that one connection went to tenanta and one to tenantb
+      j. in k9s look at the productpage pod logs to verify that one connection went to tenanta and one to tenantb
 
 9. Tenant Onboarding
 
