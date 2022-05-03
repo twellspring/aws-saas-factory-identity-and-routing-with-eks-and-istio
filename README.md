@@ -19,7 +19,7 @@ Note that the instructions below are intended to give you step-by-step, how-to i
 - pyyaml (`pip3 -q install PyYAML`)
 - kubectl
 - helm
-- A running docker Daemon (Docker Desktop, Minikube)
+- A running docker Daemon (Docker Desktop or [Minikube](https://dhwaneetbhatt.com/blog/run-docker-without-docker-desktop-on-macos))
   - If using minikube, edit ~/.docker/config.json and replace credsStore with credStore. This prevents the following error on the `docker push`
     ```
     Error saving credentials: error storing credentials - err: exec: "docker-credential-desktop": executable file not found in $PATH, out: 
