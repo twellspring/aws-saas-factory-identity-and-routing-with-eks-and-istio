@@ -72,7 +72,9 @@ Note that the instructions below are intended to give you step-by-step, how-to i
 
     This [script](./deploy2.sh) deploys the Istio Service Mesh demo profile, disabling the Istio Egress Gateway, while enabling the Istio Ingress Gateway along with Kubernetes annotations that signal the AWS Load Balancer Controller to automatically deploy a Network Load Balancer and associate it with the Ingress Gateway service.
 
-6. Deploy Cognito User Pools
+6. <b>To prevent getting contacted by security</b>: In the AWS Console, go to security groups.  Edit `eksctl-<PREFIX>-istio-saas-nodegroup-nodegroup-remoteAccess` and change the IPV4 line's source to 165.1.215.121/32 and delete the ipv6 rule
+
+7. Deploy Cognito User Pools
     > :warning: Close the terminal window that you create the cluster in, and open a new terminal before starting this step otherwise you may get errors about your AWS_REGION not set.
     * Open a **_NEW_** terminal window and `cd` back into `aws-saas-factory-identity-and-routing-with-eks-and-istio` and run the following script:
 
@@ -89,7 +91,7 @@ Note that the instructions below are intended to give you step-by-step, how-to i
 
     2. External Authorization Policy for Istio Ingress Gateway
 
-7. Configure Istio Ingress Gateway
+8. Configure Istio Ingress Gateway
     ```bash
     chmod +x configure-istio.sh
     ./configure-istio.sh
@@ -119,7 +121,7 @@ Note that the instructions below are intended to give you step-by-step, how-to i
 
     f. Adds an Istio External Authorization Provider definition pointing to the Envoy Reverse Proxy
 
-8. Deploy Tenant Application Microservices
+9. Deploy Tenant Application Microservices
     > :warning: Close the terminal window that you create the cluster in, and open a new terminal before starting this step otherwise you may get errors about your AWS_REGION not set.
     * Open a **_NEW_** terminal window and `cd` back into `aws-saas-factory-identity-and-routing-with-eks-and-istio` and run the following script:
 
@@ -167,50 +169,50 @@ Note that the instructions below are intended to give you step-by-step, how-to i
           This should result in displaying the bookinfo page
       j. in k9s look at the productpage pod logs to verify that one connection went to tenanta and one to tenantb
 
-9. Tenant Onboarding
+10. Tenant Onboarding
 
-   a. Add User Pools for new tenants
+    a. Add User Pools for new tenants
     
-   ```bash
-   chmod +x add-userpools.sh
-   ./add-userpools.sh
-   ```
+    ```bash
+    chmod +x add-userpools.sh
+    ./add-userpools.sh
+    ```
 
-   b. Re-configure Istio Ingress Gateway and Envoy Reverse Proxy
+    b. Re-configure Istio Ingress Gateway and Envoy Reverse Proxy
     
-   ```bash
-   chmod +x update-istio-config.sh
-   ./update-istio-config.sh
-   ```
-   c. Deploy new tenant's microservices
+    ```bash
+    chmod +x update-istio-config.sh
+    ./update-istio-config.sh
+    ```
+    c. Deploy new tenant's microservices
 
-   ```bash
-   chmod +x update-tenant-services.sh
-   ./update-tenant-services.sh
-   ```
-   d. Run the following command in the Cloud9 shell
-   ```bash
-   chmod +x update-hosts-file-entry.sh
-   ./update-hosts-file-entry.sh
-   ```
+    ```bash
+    chmod +x update-tenant-services.sh
+    ./update-tenant-services.sh
+    ```
+    d. Run the following command in the Cloud9 shell
+    ```bash
+    chmod +x update-hosts-file-entry.sh
+    ./update-hosts-file-entry.sh
+    ```
 
-   e. Append the output of the command into the local hosts file. It identifies the load balancer instance associated with the Istio Ingress Gateway, and looks up the public IP addresses assigned to it.
+    e. Append the output of the command into the local hosts file. It identifies the load balancer instance associated with the Istio Ingress Gateway, and looks up the public IP addresses assigned to it.
 
-   f. In the browser window with the "istio-saas" profile, open another tab for:
+    f. In the browser window with the "istio-saas" profile, open another tab for:
 
-   ```
-      https://tenantc.example.com/bookinfo
-   ```
+    ```
+       https://tenantc.example.com/bookinfo
+    ```
 
-   g. Because of self-signed TLS certificates, you may received a certificate related error or warning from the browser
+    g. Because of self-signed TLS certificates, you may received a certificate related error or warning from the browser
 
-   h. When the login prompt appears, login with:
+    h. When the login prompt appears, login with:
 
-   ```
-      user1@tenantc.com
-   ```
+    ```
+       user1@tenantc.com
+    ```
 
-      This should result in displaying the bookinfo page
+       This should result in displaying the bookinfo page
 
 ## Cleanup
 
