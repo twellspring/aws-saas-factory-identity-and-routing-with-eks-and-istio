@@ -8,6 +8,13 @@ Note that the instructions below are intended to give you step-by-step, how-to i
 ## local workstation prerequisites
 - aws cli
 - eksctl
+- istioctl (assumes ~/bin is already in your path)
+  ```bash
+  curl --no-progress-meter -L https://istio.io/downloadIstio | sh -
+  cd istio-${ISTIO_VERSION}
+  bin/istioctl version
+  cp -v bin/istioctl ~/bin
+  ```
 - pyyaml (`pip3 -q install PyYAML`)
 - kubectl
 - helm
@@ -56,8 +63,6 @@ Note that the instructions below are intended to give you step-by-step, how-to i
     After EKS Cluster is set up, the script also deploys AWS Load Balancer Controller on the cluster.
 
 7. Deploy Istio Service Mesh
-    > :warning: Close the terminal window that you created the cluster in, and open a new terminal before starting this step otherwise you may get errors about your AWS_REGION not set.
-    * Open a **_NEW_** terminal window and `cd` back into `aws-saas-factory-identity-and-routing-with-eks-and-istio` and run the following script:
 
     ```bash
     chmod +x deploy2.sh

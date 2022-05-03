@@ -1,13 +1,6 @@
 #!/usr/bin/env bash
 . ~/.bash_profile
 
-echo "Installing Istio with Ingress Gateway (NLB)"
-export ISTIO_VERSION="1.11.8"
-
-curl --no-progress-meter -L https://istio.io/downloadIstio | sh -
-cd istio-${ISTIO_VERSION}
-bin/istioctl version
-sudo cp -v bin/istioctl /usr/local/bin/
 
 istioctl install -y \
   --set profile=demo \
