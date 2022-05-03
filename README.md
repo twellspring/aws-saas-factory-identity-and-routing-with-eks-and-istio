@@ -23,7 +23,7 @@ Note that the instructions below are intended to give you step-by-step, how-to i
    - export PREFIX=`<your username>`
 2. Clone/cd to repo
    ```bash
-    git@github.com:twellspring/aws-saas-factory-identity-and-routing-with-eks-and-istio.git
+    git clone git@github.com:twellspring/aws-saas-factory-identity-and-routing-with-eks-and-istio.git
     cd aws-saas-factory-identity-and-routing-with-eks-and-istio
     git checkout remove_cloud9
     mkdir yaml
